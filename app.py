@@ -13,7 +13,8 @@ if not api_key:
     st.error("❌ Faltando 'GEMINI_API_KEY' en los Secrets.")
     st.stop()
 
-# Inicializamos el cliente sin especificar rutas beta
+# Inicializamos el cliente. 
+# Si el error 404 persiste, intentaremos una configuración explícita.
 try:
     client = genai.Client(api_key=api_key)
 except Exception as e:
@@ -24,14 +25,15 @@ user_input = st.text_area("Escribe tu frase en español:")
 
 if st.button("Traducir y Analizar"):
     if user_input:
-        with st.spinner("Consultando..."):
+        with st.spinner("Consultando al tutor..."):
             try:
-                # Usamos el cliente moderno para llamar a un modelo estable
+                # Usamos el modelo estable 'gemini-1.5-flash'
+                # La estructura 'client.models.generate_content' es la correcta para el SDK google-genai
                 response = client.models.generate_content(
-                    model='gemini-2.0-flash', 
-                    contents=f"Traduce al inglés y dame fonética: {user_input}"
+                    model='gemini-1.5-flash',
+                    contents=f"Eres un tutor de inglés. Traduce: {user_input}. Incluye fonética."
                 )
                 st.success(response.text)
             except Exception as e:
                 st.error(f"Error técnico: {e}")
-                st.info("Asegúrate de que 'google-genai' esté en tu requirements.txt.")
+                st.info("Si el error persiste, intenta cambiando el modelo a 'gemini-1.5-pro'.")
